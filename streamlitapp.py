@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import requests
 
-API_URL = "https://api-inference.huggingface.co/models/bert-base-uncased"
+API_URL = "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"
 HF_TOKEN = st.secrets.get("HF_TOKEN") or os.getenv("HF_TOKEN")
 
 headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
@@ -43,3 +43,4 @@ if st.button("Predict"):
         except Exception as e:
             st.error("Something went wrong. Check logs.")
             st.write(str(e))
+
