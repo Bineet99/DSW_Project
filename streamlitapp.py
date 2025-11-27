@@ -1,48 +1,41 @@
-import os
 import streamlit as st
+from transformers import pipeline
 import pandas as pd
-import requests
 
-# The HF inference endpoint (model name here)
-API_URL = "https://api-inference.huggingface.co/models/bert-base-uncased"
+# Load the fill-mask model only once
+@st.cache_resource
+def load_model():
+    return pipeline("fill-mask", model="bert-base-uncased")
 
-# Read token from Streamlit secrets (or environment)
-HF_TOKEN = st.secrets.get("HF_TOKEN") or os.getenv("HF_TOKEN")
+fill_mask = load_model()
 
-headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
+# App configuration
+st.set_page_config(page_title="FillAI – Smart Text Completion", layout="centered")
 
-def call_hf_inference(text, top_k=5):
-    payload = {"inputs": text, "options": {"wait_for_model": True}, "parameters": {"top_k": top_k}}
-    response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
-    response.raise_for_status()
-    return response.json()
+st.title("FillAI – Smart Text Completion")
+st.write("Enter a sentence containing **[MASK]** and the model will predict the missing word.")
 
-st.set_page_config(page_title="FillAI", layout="centered")
-st.title("FillAI – Smart Text Completion (remote inference)")
-st.write("Type a sentence that contains [MASK] and see the predicted words.")
-
+# User input
 text = st.text_input("Enter your sentence:", "The capital of India is [MASK].")
-top_k = st.slider("How many suggestions do you want?", 1, 10, 5)
+top_k = st.slider("How many predictions do you want?", 1, 10, 5)
 
+# Predict button
 if st.button("Predict"):
     if "[MASK]" not in text:
-        st.error("Please add a [MASK] in your sentence.")
+        st.error("Please include a [MASK] token in your sentence.")
     else:
-        try:
-            with st.spinner("Querying model…"):
-                results = call_hf_inference(text, top_k=top_k)
-            # Convert to table safely (API returns list of dicts)
-            rows = []
-            for item in results:
-                rows.append({
-                    "Word": item.get("token_str", "").strip(),
-                    "Probability": round(float(item.get("score", 0)), 4)
-                })
-            df = pd.DataFrame(rows)
-            st.table(df)
-        except requests.exceptions.HTTPError as http_err:
-            st.error(f"Inference API error: {http_err}")
-            st.write(http_err.response.text if hasattr(http_err, "response") else "")
-        except Exception as e:
-            st.error("Something went wrong. Check the app logs for details.")
-            st.write(str(e))
+        st.info("Predicting... please wait.")
+        results = fill_mask(text, top_k=top_k)
+
+        # Prepare table
+        rows = []
+        for item in results:
+            rows.append({
+                "Predicted Word": item["token_str"].strip(),
+                "Probability": round(float(item["score"]), 4)
+            })
+
+        df = pd.DataFrame(rows)
+
+        st.subheader("Top Predictions")
+        st.table(df)
