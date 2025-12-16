@@ -31,7 +31,7 @@ st.write("Enter a sentence containing **[MASK]** and the model will predict the 
 # User input
 text = st.text_input("Enter your sentence:",
     "He went to the [MASK] to buy groceries.")
-top_k = st.slider("How many predictions do you want?", 1, 10, 5)
+top_k = st.slider("How many predictions do you want?", 1, 10, 3)
 
 if st.button("Predict"):
     if "[MASK]" not in text:
@@ -51,4 +51,5 @@ if st.button("Predict"):
 
         st.subheader("Top Predictions")
         st.table(df)
+
 
