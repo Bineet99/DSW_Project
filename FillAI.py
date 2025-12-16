@@ -29,6 +29,7 @@ fill_mask = load_model()
 st.write("Enter a sentence containing **[MASK]** and the model will predict the missing word.")
 
 # User input
+text = st.text_input(
     "Enter your sentence:",
     "He is reading a [MASK] in the library."
 )
@@ -52,6 +53,7 @@ if st.button("Predict"):
 
         st.subheader("Top Predictions")
         st.table(df)
+
 
 
 
