@@ -46,13 +46,14 @@ if st.button("Predict"):
         for item in results:
             rows.append({
                 "Predicted Word": item["token_str"].strip(),
-                "Probability": round(float(item["score"]), 4)
+                "Probability (%)": round(item["score"] * 100, 2)
             })
 
         df = pd.DataFrame(rows)
 
         st.subheader("Top Predictions")
         st.table(df)
+
 
 
 
