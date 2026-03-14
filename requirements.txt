@@ -2,3 +2,8 @@ streamlit==1.51.0
 transformers==4.57.3
 pandas==2.3.3
 torch==2.9.1
+streamlit
+pandas
+transformers
+torch
+matplotlib
